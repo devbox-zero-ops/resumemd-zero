@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ResumeMD Zero — 免费无水印 Markdown 简历排版器 | 一键导出高清 A4 PDF</title>
+  <meta name="description" content="免费、无需登录、100% 浏览器本地运行的 Markdown 简历实时排版工具。支持大厂技术风/商务蓝/紧凑单页三套专业模板，一键打印导出高清无水印 A4 PDF，保护个人隐私不上传服务器。" />
+  <meta name="keywords" content="免费简历模板, Markdown简历, 在线简历制作无水印, 程序员简历模板, 导出PDF简历, 本地隐私简历工具, free markdown resume builder pdf" />
+  <meta property="og:title" content="ResumeMD Zero — 免费无水印本地 Markdown 简历排版器" />
+  <meta property="og:description" content="无需注册登录，零水印，一键导出高清 A4 PDF 简历。数据仅存本地浏览器。" />
+  <meta property="og:type" content="website" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "ResumeMD Zero",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CNY" },
+    "description": "Free 100% local Markdown resume builder with instant watermark-free A4 PDF export."
+  }
+  </script>
+  <style>
+    :root {
+      --ui-bg: #0f172a;
+      --ui-panel: #1e293b;
+      --ui-border: #334155;
+      --ui-text: #f1f5f9;
+      --ui-muted: #94a3b8;
+      --ui-accent: #38bdf8;
+      --accent: #111827;
+      --sub-accent: #374151;
+      --page-font: "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
+      --base-size: 13.5px;
+      --line-h: 1.58;
+    }
+    body.theme-blue {
+      --accent: #1d4ed8;
+      --sub-accent: #1e40af;
+    }
+    body.theme-compact {
+      --accent: #0f172a;
+      --sub-accent: #334155;
+      --base-size: 12.2px;
+      --line-h: 1.44;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--page-font);
+      background: var(--ui-bg);
+      color: var(--ui-text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    header.topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 10px 18px;
+      background: #0b1120;
+      border-bottom: 1px solid var(--ui-border);
+      z-index: 10;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; }
+    .tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(52,211,153,0.16);
+      color: #34d399;
+      border: 1px solid rgba(52,211,153,0.35);
+    }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .btn, select.ctrl {
+      background: var(--ui-panel);
+      color: var(--ui-text);
+      border: 1px solid var(--ui-border);
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn:hover, select.ctrl:hover { border-color: var(--ui-accent); }
+    .btn-primary {
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      color: #06101d;
+      border: none;
+    }
+    .btn-tip {
+      background: rgba(251, 191, 36, 0.16);
+      color: #fcd34d;
+      border: 1px solid rgba(251, 191, 36, 0.4);
+    }
+    .workspace {
+      display: grid;
+      grid-template-columns: 44% 56%;
+      flex: 1;
+      min-height: 0;
+    }
+    .editor-pane {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--ui-border);
+      min-height: 0;
+    }
+    .pane-head {
+      padding: 8px 14px;
+      font-size: 12px;
+      color: var(--ui-muted);
+      background: #131c31;
+      border-bottom: 1px solid var(--ui-border);
+      display: flex;
+      justify-content: space-between;
+    }
+    textarea#md-input {
+      flex: 1;
+      width: 100%;
+      border: none;
+      outline: none;
+      resize: none;
+      padding: 16px;
+      background: #0f172a;
+      color: #e2e8f0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .preview-pane {
+      background: #334155;
+      overflow: auto;
+      padding: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    article#resume-page {
+      width: 210mm;
+      min-height: 297mm;
+      background: #ffffff;
+      color: #1f2937;
+      padding: 15mm 16mm;
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+      font-size: var(--base-size);
+      line-height: var(--line-h);
+    }
+    #resume-page h1 {
+      margin: 0 0 6px;
+      font-size: 24px;
+      color: var(--accent);
+      letter-spacing: 0.02em;
+    }
+    #resume-page h2 {
+      margin: 16px 0 8px;
+      padding-bottom: 4px;
+      font-size: 15px;
+      color: var(--accent);
+      border-bottom: 1.5px solid var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    #resume-page h3 {
+      margin: 10px 0 4px;
+      font-size: 14px;
+      color: var(--sub-accent);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    #resume-page p { margin: 4px 0 6px; }
+    #resume-page ul { margin: 4px 0 8px; padding-left: 18px; }
+    #resume-page li { margin: 3px 0; }
+    #resume-page blockquote {
+      margin: 4px 0 10px;
+      padding: 0;
+      color: #4b5563;
+      font-size: 12.5px;
+    }
+    #resume-page code {
+      background: #f3f4f6;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 0.92em;
+      font-family: ui-monospace, Consolas, monospace;
+    }
+    #resume-page hr { border: none; border-top: 1px solid #e5e7eb; margin: 10px 0; }
+    dialog#tip-modal {
+      background: #111827;
+      color: #f1f5f9;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 22px;
+      max-width: 640px;
+      width: calc(100% - 32px);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
+    }
+    dialog#tip-modal::backdrop { background: rgba(2, 6, 23, 0.72); backdrop-filter: blur(4px); }
+    .qr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+    .qr-card {
+      background: rgba(0, 0, 0, 0.28);
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+    }
+    .qr-card img { width: 100%; max-width: 210px; border-radius: 8px; display: block; margin: 8px auto 0; }
+    .addr {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 11.5px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid #334155;
+      border-radius: 7px;
+      padding: 7px 10px;
+      margin-top: 6px;
+      word-break: break-all;
+      cursor: pointer;
+    }
+    @media (max-width: 960px) {
+      body { height: auto; overflow: auto; }
+      .workspace { grid-template-columns: 1fr; }
+      textarea#md-input { min-height: 360px; }
+      article#resume-page { width: 100%; min-height: auto; padding: 20px; }
+    }
+    @page { size: A4; margin: 12mm; }
+    @media print {
+      body { background: #fff !important; height: auto; overflow: visible; }
+      header.topbar, .editor-pane, dialog { display: none !important; }
+      .workspace { display: block; }
+      .preview-pane { background: #fff !important; padding: 0 !important; overflow: visible; }
+      article#resume-page {
+        width: 100% !important;
+        min-height: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span>📄 ResumeMD Zero</span>
+      <span class="tag">免费无水印 · 100%本地隐私</span>
+    </div>
+    <div class="controls">
+      <select class="ctrl" id="theme-select" onchange="setTheme(this.value)">
+        <option value="">经典技术风 (Tech Minimal)</option>
+        <option value="theme-blue">商务深蓝 (Executive Blue)</option>
+        <option value="theme-compact">紧凑单页 (Compact)</option>
+      </select>
+      <button class="btn" onclick="loadTemplate('zh')">中文程序员模板</button>
+      <button class="btn" onclick="loadTemplate('en')">English SWE</button>
+      <button class="btn" onclick="downloadMd()">导出 .md</button>
+      <button class="btn btn-primary" onclick="exportPdf()">🖨️ 导出无水印 PDF</button>
+      <button class="btn btn-tip" onclick="document.getElementById('tip-modal').showModal()">☕ 赞赏支持</button>
+    </div>
+  </header>
+
+  <div class="workspace">
+    <section class="editor-pane">
+      <div class="pane-head">
+        <span>Markdown 源码（自动实时保存至本地浏览器）</span>
+        <span>支持 `### 标题 | 右侧时间` 自动两端对齐</span>
+      </div>
+      <textarea id="md-input" spellcheck="false" oninput="render()"></textarea>
+    </section>
+    <section class="preview-pane">
+      <article id="resume-page"></article>
+    </section>
+  </div>
+
+  <dialog id="tip-modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <strong style="font-size:17px">☕ 免费无水印好用？请作者喝杯咖啡</strong>
+      <button class="btn" onclick="document.getElementById('tip-modal').close()">关闭</button>
+    </div>
+    <p style="margin:0 0 12px;color:#94a3b8;font-size:13px">
+      市面简历工具大多收费去水印，ResumeMD Zero 承诺永久免费、无水印、不收集任何简历隐私。如果帮到了你的求职，欢迎扫码随心赞赏：
+    </p>
+    <div class="qr-grid">
+      <div class="qr-card">
+        <strong>微信赞赏 (WeChat Pay)</strong>
+        <img src="./assets/wechat-pay.jpg" alt="微信收款码" loading="lazy" />
+      </div>
+      <div class="qr-card">
+        <strong>支付宝赞赏 (Alipay)</strong>
+        <img src="./assets/alipay.jpg" alt="支付宝收款码" loading="lazy" />
+      </div>
+    </div>
+    <div style="font-size:12px;color:#94a3b8">海外用户也可通过 USDC 赞助（点击复制）：</div>
+    <div class="addr" onclick="copyText('0xe4c8739bCC488bD98978CE976511735e0499d432', this)">Base / EVM USDC: 0xe4c8739bCC488bD98978CE976511735e0499d432</div>
+    <div class="addr" onclick="copyText('89XqpaJDKajhYFs4Vmex853yxoEU7HqwnMAPtTDpgZgG', this)">Solana USDC: 89XqpaJDKajhYFs4Vmex853yxoEU7HqwnMAPtTDpgZgG</div>
+    <div style="margin-top:12px;font-size:12px;color:#94a3b8">
+      更多免费本地工具：<a href="https://devbox-zero-ops.github.io/devbox-zero/" target="_blank" style="color:#38bdf8">⚡ DevBox Zero</a> · <a href="https://devbox-zero-ops.github.io/chaincalc-zero/" target="_blank" style="color:#38bdf8">🧮 ChainCalc Zero</a>
+    </div>
+  </dialog>
+
+  <script>
+    const TEMPLATES = {
+      zh: `# 张三
+> 后端 / 全栈开发工程师 · 北京 · 138-0000-0000 · zhangsan@example.com · github.com/zhangsan
+
+## 个人优势
+- 3 年高并发 Web 后端与全栈架构经验，熟悉 **TypeScript / Node.js / Go / Python / PostgreSQL / Redis**。
+- 主导过核心交易与自动化工具系统重构，接口 P99 延迟降低 **62%**，服务器成本下降 **40%**。
+
+## 工作经历
+### 某互联网科技公司 · 高级后端工程师 | 2024.03 - 至今
+- **高并发订单与异步任务调度系统**：基于 Go + Redis Stream 重构消息分发链路，峰值 QPS 从 4,000 提升至 **15,000+**，零消息丢失。
+- **自动化可观测平台**：搭建 OpenTelemetry + Prometheus 全链路追踪，线上故障平均定位时间（MTTR）从 35 分钟缩短至 **6 分钟**。
+
+### 某云计算初创团队 · 全栈开发工程师 | 2022.07 - 2024.02
+- **低代码报表与 PDF 导出引擎**：负责前端 React 架构与后端无头浏览器渲染池优化，导出成功率提升至 **99.8%**。
+- 设计多租户 RBAC 权限体系与 OpenAPI 网关，支撑 120+ 企业客户稳定接入。
+
+## 代表项目
+### 开源零依赖开发者工具套件（DevBox） | 2025.01 - 至今
+- 独立设计并发布纯浏览器本地运行的工具矩阵（JSON/JWT/Regex/Diff），GitHub 获得 **1,200+ Stars**。
+- 采用零第三方依赖与 Web Crypto API 架构，首屏加载时间 **< 120ms**。
+
+## 教育背景
+### 某重点大学 · 计算机科学与技术（本科） | 2018.09 - 2022.06
+- GPA 3.7/4.0 · 校级一等奖学金 · ACM/ICPC 区域赛铜牌`,
+      en: `# Alex Chen
+> Senior Software Engineer · San Francisco, CA · alex@example.com · github.com/alexchen
+
+## Summary
+Full-stack & distributed systems engineer with 4+ years of experience in **TypeScript, Node.js, Go, Python, PostgreSQL, and Cloud Infrastructure**. Focused on latency reduction, clean architecture, and reliable developer tooling.
+
+## Experience
+### Acme Cloud Corp · Senior Software Engineer | 2024.02 - Present
+- Architected an event-driven billing & webhook pipeline in Go and PostgreSQL processing **12M+ events/day** with 99.99% delivery SLA.
+- Cut p99 API latency by **58%** and reduced monthly cloud compute spend by **$14K** via query indexing and edge caching.
+
+### Nova Labs · Software Engineer | 2022.06 - 2024.01
+- Built React + TypeScript real-time analytics dashboards used daily by **45,000+ active developers**.
+- Automated CI/CD release verification and unit test coverage from 42% to **89%**.
+
+## Selected Projects
+### Local-First Privacy Developer Suite | 2025 - Present
+- Engineered a zero-telemetry browser toolkit (JSON/TS, JWT, Regex, SHA-256) with sub-100ms cold load and offline PWA support.
+
+## Education
+### University of Example · B.S. in Computer Science | 2018 - 2022`
+    };
+
+    function escapeHtml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function inlineMd(s) {
+      return escapeHtml(s)
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    }
+
+    function mdToHtml(md) {
+      const lines = md.replace(/\r\n/g, '\n').split('\n');
+      let out = [];
+      let inList = false;
+      const closeList = () => { if (inList) { out.push('</ul>'); inList = false; } };
+
+      for (const raw of lines) {
+        const line = raw.trim();
+        if (!line) { closeList(); continue; }
+        if (line === '---') { closeList(); out.push('<hr />'); continue; }
+        if (line.startsWith('# ')) { closeList(); out.push(`<h1>${inlineMd(line.slice(2))}</h1>`); continue; }
+        if (line.startsWith('## ')) { closeList(); out.push(`<h2>${inlineMd(line.slice(3))}</h2>`); continue; }
+        if (line.startsWith('### ')) {
+          closeList();
+          const content = line.slice(4);
+          if (content.includes(' | ')) {
+            const [left, right] = content.split(' | ');
+            out.push(`<h3><span>${inlineMd(left)}</span><span style="font-weight:500;color:#6b7280;font-size:12.5px">${inlineMd(right)}</span></h3>`);
+          } else {
+            out.push(`<h3>${inlineMd(content)}</h3>`);
+          }
+          continue;
+        }
+        if (line.startsWith('> ')) { closeList(); out.push(`<blockquote>${inlineMd(line.slice(2))}</blockquote>`); continue; }
+        if (line.startsWith('- ') || line.startsWith('* ')) {
+          if (!inList) { out.push('<ul>'); inList = true; }
+          out.push(`<li>${inlineMd(line.slice(2))}</li>`);
+          continue;
+        }
+        closeList();
+        out.push(`<p>${inlineMd(line)}</p>`);
+      }
+      closeList();
+      return out.join('\n');
+    }
+
+    function render() {
+      const val = document.getElementById('md-input').value;
+      localStorage.setItem('resumemd_zero_draft', val);
+      document.getElementById('resume-page').innerHTML = mdToHtml(val);
+    }
+
+    function setTheme(cls) {
+      document.body.className = cls;
+      localStorage.setItem('resumemd_zero_theme', cls);
+    }
+
+    function loadTemplate(lang) {
+      document.getElementById('md-input').value = TEMPLATES[lang];
+      render();
+    }
+
+    function downloadMd() {
+      const blob = new Blob([document.getElementById('md-input').value], { type: 'text/markdown;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'resume.md';
+      a.click();
+    }
+
+    function exportPdf() {
+      window.print();
+    }
+
+    function copyText(text, el) {
+      navigator.clipboard.writeText(text);
+      const old = el.textContent;
+      el.textContent = '已复制: ' + text;
+      setTimeout(() => { el.textContent = old; }, 1400);
+    }
+
+    const saved = localStorage.getItem('resumemd_zero_draft');
+    document.getElementById('md-input').value = saved || TEMPLATES.zh;
+    const savedTheme = localStorage.getItem('resumemd_zero_theme') || '';
+    document.getElementById('theme-select').value = savedTheme;
+    setTheme(savedTheme);
+    render();
+  </script>
+</body>
+</html>
