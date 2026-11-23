@@ -10,7 +10,7 @@
 - 内置 3 套招聘级主题（经典技术风 / 商务深蓝 / 紧凑单页）及中英双模板
 - 支持 `### 职位/项目 | 右侧时间` 自动两端对齐
 
-## 支持项目（微信 / 支付宝 / USDC）
+## 支持项目（微信 / 支付宝 / USDT）
 - 微信 / 支付宝赞赏码见网站右上角「☕ 赞赏支持」弹窗
-- Base / EVM USDC: `0xe4c8739bCC488bD98978CE976511735e0499d432`
-- Solana USDC: `89XqpaJDKajhYFs4Vmex853yxoEU7HqwnMAPtTDpgZgG`
+- Base / EVM USDT: `0xe4c8739bCC488bD98978CE976511735e0499d432`
+- Solana USDT: `89XqpaJDKajhYFs4Vmex853yxoEU7HqwnMAPtTDpgZgG`
